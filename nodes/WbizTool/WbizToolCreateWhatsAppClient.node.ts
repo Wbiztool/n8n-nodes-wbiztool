@@ -1,28 +1,31 @@
 import {
+	IDataObject,
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	NodeConnectionTypes,
 	NodeOperationError,
-	NodeConnectionType,
 } from 'n8n-workflow';
 
-import { wbizToolApiRequest } from './GenericFunctions';
+import { forEachItem, requireText, wbizToolApiRequest } from './GenericFunctions';
 
 export class WbizToolCreateWhatsAppClient implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'WbizTool Create WhatsApp Client',
 		name: 'wbizToolCreateWhatsAppClient',
-		icon: 'fa:comment',
-		group: ['utility'],
+		icon: { light: 'file:../../icons/wbiztool.png', dark: 'file:../../icons/wbiztool.png' },
+		group: ['output'],
 		version: 1,
 		subtitle: '=Create WhatsApp client for {{$parameter["whatsappNumber"]}}',
-		description: 'Create a new WhatsApp client connection via WbizTool',
+		description:
+			'Add a WhatsApp number to your WbizTool workspace and get its QR code on a webhook',
 		defaults: {
 			name: 'WbizTool Create WhatsApp Client',
 		},
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		usableAsTool: true,
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'wbizToolApi',
@@ -37,111 +40,69 @@ export class WbizToolCreateWhatsAppClient implements INodeType {
 				default: '',
 				required: true,
 				placeholder: '+919632066772',
-				description: 'WhatsApp number to connect (with or without + symbol)',
+				description: 'WhatsApp number to connect, with country code',
 			},
 			{
 				displayName: 'Webhook URL',
 				name: 'webhookUrl',
 				type: 'string',
 				default: '',
-				required: false,
 				placeholder: 'https://your-webhook.com/callback',
-				description: 'Webhook URL for notifications (optional)',
+				description:
+					"Receives the QR code to scan (status qr_generated, qr_image) and then status connected or not_connected. Without it you can't see the QR code.",
 			},
 		],
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const items = this.getInputData();
-		const returnData: INodeExecutionData[] = [];
-		const credentials = await this.getCredentials('wbizToolApi');
+		return await forEachItem.call(this, async (i) => {
+			const whatsappNumber = requireText.call(
+				this,
+				this.getNodeParameter('whatsappNumber', i),
+				'WhatsApp Number',
+				i,
+			);
+			const webhookUrl = String(this.getNodeParameter('webhookUrl', i, '')).trim();
 
-		for (let i = 0; i < items.length; i++) {
-			try {
-				const whatsappNumber = this.getNodeParameter('whatsappNumber', i) as string;
-				const webhookUrl = this.getNodeParameter('webhookUrl', i, '') as string;
-
-				// Validate WhatsApp number
-				if (!whatsappNumber.trim()) {
-					throw new NodeOperationError(
-						this.getNode(),
-						'WhatsApp number cannot be empty',
-						{ itemIndex: i }
-					);
-				}
-
-				// Clean WhatsApp number (remove + and spaces)
-				const cleanNumber = whatsappNumber.replace(/[\s+\-()]/g, '');
-				if (!/^\d{10,15}$/.test(cleanNumber)) {
-					throw new NodeOperationError(
-						this.getNode(),
-						'WhatsApp number must be 10-15 digits',
-						{ itemIndex: i }
-					);
-				}
-
-				// Build the request body
-				const body: any = {
-					client_id: credentials.clientId,
-					api_key: credentials.apiKey,
-					whatsapp_number: cleanNumber,
-				};
-
-				// Add webhook URL if provided
-				if (webhookUrl.trim()) {
-					body.webhook_url = webhookUrl;
-				}
-
-				// Make the API request to create WhatsApp client endpoint
-				const response = await wbizToolApiRequest.call(this, 'POST', '/whatsapp-client/create/', body);
-
-				// Check if the response indicates success
-				if (response.status !== 1) {
-					throw new NodeOperationError(
-						this.getNode(),
-						`WbizTool API Error: ${response.message}`,
-						{ itemIndex: i }
-					);
-				}
-
-				// Return the response data
-				returnData.push({
-					json: {
-						success: true,
-						status: response.status,
-						message: response.message,
-						whatsappClientId: response.whatsapp_client_id || null,
-						response: response,
-						input: {
-							whatsappNumber: cleanNumber,
-							webhookUrl: webhookUrl || null,
-						},
-						client: {
-							whatsappClientId: response.whatsapp_client_id || null,
-							whatsappNumber: cleanNumber,
-							webhookUrl: webhookUrl || null,
-							createdAt: new Date().toISOString(),
-							status: 'created',
-						},
+			const cleanNumber = whatsappNumber.replace(/[\s+\-()]/g, '');
+			if (!/^\d{10,15}$/.test(cleanNumber)) {
+				throw new NodeOperationError(
+					this.getNode(),
+					`WhatsApp Number "${whatsappNumber}" isn't 10 to 15 digits`,
+					{
+						description: 'Enter the full number with country code, e.g. +919632066772',
+						itemIndex: i,
 					},
-					pairedItem: { item: i },
-				});
-
-			} catch (error: any) {
-				if (this.continueOnFail()) {
-					returnData.push({
-						json: {
-							success: false,
-							error: error instanceof Error ? error.message : String(error),
-						},
-						pairedItem: { item: i },
-					});
-					continue;
-				}
-				throw error;
+				);
 			}
-		}
 
-		return [returnData];
+			const body: IDataObject = { whatsapp_number: cleanNumber };
+			if (webhookUrl) {
+				body.webhook_url = webhookUrl;
+			}
+
+			const response = await wbizToolApiRequest.call(this, '/whatsapp-client/create/', body, {
+				itemIndex: i,
+			});
+
+			return {
+				success: true,
+				status: response.status,
+				message: response.message,
+				whatsappClientId: response.whatsapp_client_id ?? null,
+				response,
+				input: {
+					whatsappNumber: cleanNumber,
+					webhookUrl: webhookUrl || null,
+				},
+				client: {
+					whatsappClientId: response.whatsapp_client_id ?? null,
+					whatsappNumber: cleanNumber,
+					webhookUrl: webhookUrl || null,
+					createdAt: new Date().toISOString(),
+					status: 'created',
+				},
+			};
+		});
 	}
-} 
+}

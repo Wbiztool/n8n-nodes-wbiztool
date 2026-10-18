@@ -1,0 +1,73 @@
+# Publishes n8n-nodes-wbiztool to npm with a provenance statement when a version tag is pushed
+# (n8n requires GitHub Actions publishing with provenance for verified community nodes since 1 May 2026).
+#
+# This workflow runs in the public repo github.com/wbiztool/n8n-nodes-wbiztool, where this package is the root.
+# (In the WbizTool monorepo it lives under packages/n8n-node/ and GitHub ignores it.)
+#
+# One-time setup, either:
+#   A. npm Trusted Publishing (no secret): npmjs.com → n8n-nodes-wbiztool → Settings → Trusted publishers →
+#      GitHub Actions, owner "wbiztool", repository "n8n-nodes-wbiztool", workflow "publish.yml". Leave NPM_TOKEN unset.
+#   B. Token: npmjs.com → Access Tokens → Granular access token with read and write on n8n-nodes-wbiztool, saved in
+#      GitHub → Settings → Secrets and variables → Actions as NPM_TOKEN.
+#
+# Release: set "version" in package.json and CHANGELOG.md, commit, then push a matching tag, e.g.
+#   git tag v0.2.0 && git push origin v0.2.0
+# The job refuses a tag that doesn't match package.json.
+
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions: {}
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # signs the provenance statement (and npm Trusted Publishing)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      # Trusted Publishing needs npm 11.5.1 or later
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Check the tag matches package.json
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $VERSION" >&2
+            exit 1
+          fi
+
+      # Dev tools only (the package has no runtime dependencies); no install scripts needed
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish
+        # RELEASE_MODE lets `prepublishOnly` (n8n-node prerelease) through; it blocks a plain local `npm publish`
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_MODE: 'true'

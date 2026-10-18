@@ -3,26 +3,32 @@ import {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
+	NodeApiError,
+	NodeConnectionTypes,
 	NodeOperationError,
-	NodeConnectionType,
 } from 'n8n-workflow';
 
-import { wbizToolApiRequest } from './GenericFunctions';
+import { forEachItem, readMessageState, requireText, wbizToolApiRequest } from './GenericFunctions';
 
 export class WbizToolMessageStatus implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'WbizTool Message Status',
 		name: 'wbizToolMessageStatus',
-		icon: 'fa:comment',
-		group: ['communication'],
-		version: 1,
+		icon: { light: 'file:../../icons/wbiztool.png', dark: 'file:../../icons/wbiztool.png' },
+		group: ['input'],
+		// 1.1: every message state is an output item (version 1 stopped with an error unless the message was Sent)
+		version: [1, 1.1],
+		defaultVersion: 1.1,
 		subtitle: '=Check status of message ID {{$parameter["messageId"]}}',
-		description: 'Check WhatsApp message delivery status via WbizTool',
+		description:
+			'Get the status of a WhatsApp message sent via WbizTool: queued, sent, failed, cancelled or expired',
 		defaults: {
 			name: 'WbizTool Message Status',
 		},
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		usableAsTool: true,
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [
 			{
 				name: 'wbizToolApi',
@@ -37,86 +43,73 @@ export class WbizToolMessageStatus implements INodeType {
 				default: '',
 				required: true,
 				placeholder: '12345',
-				description: 'ID of the message to check status for',
+				description: 'ID of the message to check (messageId from WbizTool Send Message)',
 			},
 		],
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const items = this.getInputData();
-		const returnData: INodeExecutionData[] = [];
-		const credentials = await this.getCredentials('wbizToolApi');
-
-		for (let i = 0; i < items.length; i++) {
-			try {
-				const messageId = this.getNodeParameter('messageId', i) as string;
-
-				// Validate message ID
-				if (!messageId.trim()) {
-					throw new NodeOperationError(
-						this.getNode(),
-						'Message ID cannot be empty',
-						{ itemIndex: i }
-					);
-				}
-
-				// Build the request body
-				const body: any = {
-					client_id: credentials.clientId,
-					api_key: credentials.apiKey,
-				};
-
-				// Make the API request to message status endpoint (with ID in URL)
-				const response = await wbizToolApiRequest.call(this, 'POST', `/message/status/${messageId}/`, body);
-
-				// Check if the response indicates success
-				if (response.status !== 1) {
-					throw new NodeOperationError(
-						this.getNode(),
-						`WbizTool API Error: ${response.message}`,
-						{ itemIndex: i }
-					);
-				}
-
-				// Return the response data
-				returnData.push({
-					json: {
-						success: true,
-						messageId,
-						status: response.status,
-						message: response.message,
-						statusText: response.status_text || response.message,
-						error: response.error || null,
-						response: response,
-						input: {
-							messageId,
-						},
-						deliveryStatus: {
-							messageId,
-							statusText: response.status_text || response.message,
-							deliveryStatus: response.status === 1 ? 'delivered' : 'failed',
-							errorMessage: response.error || null,
-							checkedAt: new Date().toISOString(),
-						},
-					},
-					pairedItem: { item: i },
+		return await forEachItem.call(this, async (i) => {
+			const messageId = requireText.call(
+				this,
+				this.getNodeParameter('messageId', i),
+				'Message ID',
+				i,
+			);
+			if (!/^\d+$/.test(messageId)) {
+				throw new NodeOperationError(this.getNode(), `Message ID "${messageId}" isn't a number`, {
+					description: 'Map the messageId output of a WbizTool Send Message node',
+					itemIndex: i,
 				});
-
-			} catch (error: any) {
-				if (this.continueOnFail()) {
-					returnData.push({
-						json: {
-							success: false,
-							error: error instanceof Error ? error.message : String(error),
-						},
-						pairedItem: { item: i },
-					});
-					continue;
-				}
-				throw error;
 			}
-		}
 
-		return [returnData];
+			// `status` here is the message's state (0 = Created), so status 0 is not a failed request
+			const response = await wbizToolApiRequest.call(
+				this,
+				`/message/status/${messageId}/`,
+				{},
+				{
+					allowStatusZero: true,
+					itemIndex: i,
+				},
+			);
+			const state = readMessageState(response);
+			if (!state) {
+				throw new NodeApiError(this.getNode(), response as JsonObject, {
+					message: String(response.error ?? response.message ?? 'Unknown message id'),
+					description: 'Check the Message ID: it must be a message of this workspace',
+					itemIndex: i,
+				});
+			}
+			if (state.statusCode !== 1 && this.getNode().typeVersion < 1.1) {
+				// Version 1 behaviour, kept for workflows that branch on it with "Continue On Fail"
+				throw new NodeApiError(this.getNode(), response as JsonObject, {
+					message: state.statusText,
+					itemIndex: i,
+				});
+			}
+
+			const errorMessage =
+				typeof response.error === 'string' && response.error ? response.error : null;
+			return {
+				success: true,
+				messageId,
+				status: state.statusCode,
+				message: response.message,
+				statusText: state.statusText,
+				error: errorMessage,
+				response,
+				input: {
+					messageId,
+				},
+				deliveryStatus: {
+					messageId,
+					statusText: state.statusText,
+					deliveryStatus: state.deliveryStatus,
+					errorMessage,
+					checkedAt: new Date().toISOString(),
+				},
+			};
+		});
 	}
-} 
+}

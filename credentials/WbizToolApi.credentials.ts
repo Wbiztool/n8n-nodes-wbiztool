@@ -1,14 +1,17 @@
-import {
+import type {
 	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
+	Icon,
 	INodeProperties,
 } from 'n8n-workflow';
 
 export class WbizToolApi implements ICredentialType {
 	name = 'wbizToolApi';
 	displayName = 'WbizTool API';
-	documentationUrl = 'https://wbiztool.com/docs/';
+	// The brand icon (green bubble, white marks) reads on both themes
+	icon: Icon = { light: 'file:../icons/wbiztool.png', dark: 'file:../icons/wbiztool.png' };
+	documentationUrl = 'https://wbiztool.com/docs/n8n-integration/';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Client ID',
@@ -16,7 +19,7 @@ export class WbizToolApi implements ICredentialType {
 			type: 'number',
 			default: 0,
 			required: true,
-			description: 'Your unique Client ID from WbizTool API Keys page',
+			description: 'Your Client ID from WbizTool → Settings → API keys',
 			placeholder: 'e.g. 12345',
 		},
 		{
@@ -26,8 +29,7 @@ export class WbizToolApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: '',
 			required: true,
-			description: 'Your API Key from WbizTool API Keys page',
-			placeholder: 'e.g. wbt_live_abc123...',
+			description: 'Your API key from WbizTool → Settings → API keys',
 		},
 		{
 			displayName: 'WhatsApp Client ID',
@@ -35,7 +37,8 @@ export class WbizToolApi implements ICredentialType {
 			type: 'number',
 			default: 0,
 			required: true,
-			description: 'Your default WhatsApp Client ID (can be overridden in individual nodes)',
+			description:
+				'The WhatsApp number to send from by default, from WbizTool → WhatsApp settings. Nodes with a WhatsApp Client ID field can override it.',
 			placeholder: 'e.g. 67890',
 		},
 		{
@@ -44,7 +47,7 @@ export class WbizToolApi implements ICredentialType {
 			type: 'string',
 			default: 'https://wbiztool.com/api/v1',
 			required: true,
-			description: 'WbizTool API base URL',
+			description: 'Keep the default unless WbizTool support gives you another one',
 		},
 	];
 
@@ -63,10 +66,15 @@ export class WbizToolApi implements ICredentialType {
 			baseURL: '={{$credentials.baseUrl}}',
 			url: '/me/',
 			method: 'POST',
+			// source and User-Agent: as nodes/WbizTool/GenericFunctions.ts sends them (WbizTool's analytics)
+			headers: {
+				'User-Agent': 'n8n-nodes-wbiztool/0.2.0',
+			},
 			body: {
 				client_id: '={{$credentials.clientId}}',
 				api_key: '={{$credentials.apiKey}}',
 				whatsapp_client: '={{$credentials.whatsappClientId}}',
+				source: 'n8n',
 			},
 		},
 		rules: [
@@ -79,4 +87,4 @@ export class WbizToolApi implements ICredentialType {
 			},
 		],
 	};
-} 
+}
