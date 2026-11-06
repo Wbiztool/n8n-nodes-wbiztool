@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-wbiztool",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "WbizTool node for n8n: send WhatsApp messages, files and group messages from your own number, schedule and track them.",
   "keywords": [
     "n8n-community-node-package",
@@ -12,17 +12,17 @@
     "workflow"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/wbiztool/n8n-nodes-wbiztool",
+  "homepage": "https://github.com/Wbiztool/n8n-nodes-wbiztool",
   "author": {
     "name": "WbizTool Team",
     "email": "support@wbiztool.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wbiztool/n8n-nodes-wbiztool.git"
+    "url": "git+https://github.com/Wbiztool/n8n-nodes-wbiztool.git"
   },
   "bugs": {
-    "url": "https://github.com/wbiztool/n8n-nodes-wbiztool/issues"
+    "url": "https://github.com/Wbiztool/n8n-nodes-wbiztool/issues"
   },
   "engines": {
     "node": ">=18.0.0",

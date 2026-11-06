@@ -14,7 +14,7 @@ import {
  * WordPress plugin send theirs the same way) and this User-Agent. Keep the version in step with package.json.
  */
 export const WBIZTOOL_SOURCE = 'n8n';
-export const WBIZTOOL_USER_AGENT = 'n8n-nodes-wbiztool/0.2.0';
+export const WBIZTOOL_USER_AGENT = 'n8n-nodes-wbiztool/0.2.1';
 
 export interface WbizToolRequestOptions {
 	/**

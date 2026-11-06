@@ -68,7 +68,7 @@ export class WbizToolApi implements ICredentialType {
 			method: 'POST',
 			// source and User-Agent: as nodes/WbizTool/GenericFunctions.ts sends them (WbizTool's analytics)
 			headers: {
-				'User-Agent': 'n8n-nodes-wbiztool/0.2.0',
+				'User-Agent': 'n8n-nodes-wbiztool/0.2.1',
 			},
 			body: {
 				client_id: '={{$credentials.clientId}}',

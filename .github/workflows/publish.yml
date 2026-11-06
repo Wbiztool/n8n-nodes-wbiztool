@@ -1,17 +1,17 @@
 # Publishes n8n-nodes-wbiztool to npm with a provenance statement when a version tag is pushed
 # (n8n requires GitHub Actions publishing with provenance for verified community nodes since 1 May 2026).
 #
-# This workflow runs in the public repo github.com/wbiztool/n8n-nodes-wbiztool, where this package is the root.
+# This workflow runs in the public repo github.com/Wbiztool/n8n-nodes-wbiztool, where this package is the root.
 # (In the WbizTool monorepo it lives under packages/n8n-node/ and GitHub ignores it.)
 #
 # One-time setup, either:
 #   A. npm Trusted Publishing (no secret): npmjs.com → n8n-nodes-wbiztool → Settings → Trusted publishers →
-#      GitHub Actions, owner "wbiztool", repository "n8n-nodes-wbiztool", workflow "publish.yml". Leave NPM_TOKEN unset.
+#      GitHub Actions, owner "Wbiztool" (capital W, exact), repository "n8n-nodes-wbiztool", workflow "publish.yml". Leave NPM_TOKEN unset.
 #   B. Token: npmjs.com → Access Tokens → Granular access token with read and write on n8n-nodes-wbiztool, saved in
 #      GitHub → Settings → Secrets and variables → Actions as NPM_TOKEN.
 #
 # Release: set "version" in package.json and CHANGELOG.md, commit, then push a matching tag, e.g.
-#   git tag v0.2.0 && git push origin v0.2.0
+#   git tag v0.2.1 && git push origin v0.2.1
 # The job refuses a tag that doesn't match package.json.
 
 name: Publish
