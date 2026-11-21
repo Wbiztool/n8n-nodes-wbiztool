@@ -34,6 +34,16 @@ export class WbizToolCreateWhatsAppClient implements INodeType {
 		],
 		properties: [
 			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'Connect WhatsApp Number', value: 'createWhatsAppClient', action: 'Connect a number' },
+				],
+				default: 'createWhatsAppClient',
+			},
+			{
 				displayName: 'WhatsApp Number',
 				name: 'whatsappNumber',
 				type: 'string',

@@ -31,6 +31,16 @@ export class WbizToolCancelMessage implements INodeType {
 		],
 		properties: [
 			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'Cancel Message', value: 'cancelMessage', action: 'Cancel a message' },
+				],
+				default: 'cancelMessage',
+			},
+			{
 				displayName: 'Message ID',
 				name: 'messageId',
 				type: 'string',

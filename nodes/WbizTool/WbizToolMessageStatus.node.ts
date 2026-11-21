@@ -37,6 +37,16 @@ export class WbizToolMessageStatus implements INodeType {
 		],
 		properties: [
 			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'Get Message Status', value: 'messageStatus', action: 'Get the status of a message' },
+				],
+				default: 'messageStatus',
+			},
+			{
 				displayName: 'Message ID',
 				name: 'messageId',
 				type: 'string',

@@ -37,6 +37,16 @@ export class WbizToolWhatsAppClientStatus implements INodeType {
 		],
 		properties: [
 			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'Get Number Status', value: 'whatsAppClientStatus', action: 'Get the status of a number' },
+				],
+				default: 'whatsAppClientStatus',
+			},
+			{
 				displayName: 'WhatsApp Client ID',
 				name: 'whatsappClientId',
 				type: 'number',

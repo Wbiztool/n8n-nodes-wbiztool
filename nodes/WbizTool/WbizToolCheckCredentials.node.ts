@@ -32,6 +32,16 @@ export class WbizToolCheckCredentials implements INodeType {
 		],
 		properties: [
 			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'Check Credentials', value: 'checkCredentials', action: 'Check credentials' },
+				],
+				default: 'checkCredentials',
+			},
+			{
 				displayName: 'WhatsApp Client ID to Validate',
 				name: 'whatsappClientId',
 				type: 'number',

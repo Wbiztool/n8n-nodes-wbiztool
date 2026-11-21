@@ -30,7 +30,18 @@ export class WbizToolListWhatsAppClients implements INodeType {
 				required: true,
 			},
 		],
-		properties: [],
+		properties: [
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'List WhatsApp Numbers', value: 'listWhatsAppClients', action: 'List numbers' },
+				],
+				default: 'listWhatsAppClients',
+			},
+		],
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
