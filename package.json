@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-wbiztool",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "WbizTool node for n8n: send WhatsApp messages, files and group messages from your own number, schedule and track them.",
   "keywords": [
     "n8n-community-node-package",
