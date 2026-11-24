@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking: one WbizTool node replaces the ten nodes
 
-n8n allows one regular node per community package, so the ten WbizTool nodes are now a single **WbizTool** node with
-a Resource and an Operation field. Workflows built with 0.2.x keep running while n8n has 0.2.3 installed; after you
+The ten WbizTool nodes are now a single **WbizTool** node with a Resource and an Operation field, so the package
+meets n8n's verification guidelines for community nodes (one regular node per package). Workflows built with 0.2.x keep running while n8n has 0.2.3 installed; after you
 update to 1.0.0 their old WbizTool nodes show as unknown ("?") and need to be replaced. For each old node, add a
-**WbizTool** node, pick the resource and operation below, enter the same values and reconnect it. The fields keep
-their names and the output keeps its fields (`messageId`, `scheduledMessageId`, `messageIds`, `statusText`,
+**WbizTool** node, pick the resource and operation below, enter the same values and reconnect it. Most fields keep
+their names (renamed: Target Type → Send To, Additional Options → Options, Phone Numbers of Send Multi Message →
+Recipients) and the output keeps its fields (`messageId`, `scheduledMessageId`, `messageIds`, `statusText`,
 `isConnected` …), so expressions in later nodes keep working once the new node has the old node's name.
 
 | Old node (0.2.x) | Resource | Operation |

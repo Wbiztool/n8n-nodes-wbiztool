@@ -11,8 +11,8 @@ API reference: [wbiztool.com/docs/](https://wbiztool.com/docs/)
 In n8n, go to **Settings → Community Nodes → Install**, enter `n8n-nodes-wbiztool` and confirm. See n8n's
 [community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/).
 
-On a self-hosted instance you can also run `npm install n8n-nodes-wbiztool` in your n8n custom nodes folder
-(`~/.n8n/custom`) and restart n8n.
+On a self-hosted instance you can also run `npm install n8n-nodes-wbiztool` in your n8n nodes folder
+(`~/.n8n/nodes`, create it if it doesn't exist) and restart n8n.
 
 ## Credentials
 
@@ -122,10 +122,11 @@ self-hosted n8n, community nodes are only offered as tools when n8n runs with
 
 ## Upgrading from 0.2.x
 
-Version 1.0.0 replaces the ten WbizTool nodes of 0.2.x with the single WbizTool node (n8n allows one regular node
-per community package). Workflows keep running while n8n has 0.2.x installed. After updating, the old nodes show
+Version 1.0.0 replaces the ten WbizTool nodes of 0.2.x with the single WbizTool node, so the package meets n8n's verification guidelines for community
+nodes (one regular node per package). Workflows keep running while n8n has 0.2.x installed. After updating, the old nodes show
 as unknown: replace each with a **WbizTool** node, set the resource and operation from this table, enter the same
-values and give it the old node's name so expressions in later nodes keep working. Output field names are
+values and give it the old node's name so expressions in later nodes keep working. Most fields keep their names (renamed: Target Type → Send
+To, Additional Options → Options, Phone Numbers of Send Multi Message → Recipients); output field names are
 unchanged; `input.target` of Send and Schedule is the number as sent, with the Country Code in `input.countryCode`.
 
 | Old node (0.2.x) | Resource | Operation |
