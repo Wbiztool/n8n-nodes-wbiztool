@@ -633,6 +633,18 @@ describe('WhatsApp Number › Get Status', () => {
 		});
 	});
 
+	it('General Status: Auth Error 2 (unknown WhatsApp Client ID) hints at the ID, not the credential', async () => {
+		const { run } = mockRun(
+			node,
+			number('getStatus', { whatsappClientId: 999, checkMethod: 'general' }),
+			{ body: '{"message": "Auth Error 2", "status": 0}' },
+		);
+		await expect(run()).rejects.toMatchObject({
+			message: 'Auth Error 2',
+			description: expect.stringContaining('Check the WhatsApp Client ID'),
+		});
+	});
+
 	it('Connected', async () => {
 		const { run } = mockRun(
 			node,

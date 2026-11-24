@@ -120,6 +120,10 @@ export async function wbizToolApiRequest(
 /** How to fix the API's common answers (the troubleshooting table of wbiztool.com/docs/n8n-integration/). */
 export function apiMessageHint(message: unknown): string | undefined {
 	const text = String(message ?? '');
+	// "Auth Error 2": /whatsapp-client/status/ found no such WhatsApp number in the workspace; the key itself worked
+	if (/^Auth Error 2$/i.test(text.trim())) {
+		return "Check the WhatsApp Client ID: it must be a number in this workspace (WbizTool → WhatsApp settings)";
+	}
 	if (/^Auth Error|Invalid client id/i.test(text)) {
 		return 'Check the Client ID and API Key in the WbizTool API credential (WbizTool → Settings → API keys)';
 	}

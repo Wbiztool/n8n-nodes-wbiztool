@@ -90,7 +90,7 @@ Each input item gives one output item with the API answer in `response` plus:
 ```
 
 If WbizTool refuses a request, the node stops with WbizTool's message (for example `Invalid whatsapp client 678: …`)
-and a hint for the common ones. Turn on the node's **Continue On Fail** setting to get an item with `success: false`
+and a hint for the common ones. In the node's **Settings**, set **On Error** to **Continue** to get an item with `success: false`
 and `error` instead.
 
 ### Use as an AI agent tool
