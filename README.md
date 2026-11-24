@@ -125,7 +125,8 @@ self-hosted n8n, community nodes are only offered as tools when n8n runs with
 Version 1.0.0 replaces the ten WbizTool nodes of 0.2.x with the single WbizTool node (n8n allows one regular node
 per community package). Workflows keep running while n8n has 0.2.x installed. After updating, the old nodes show
 as unknown: replace each with a **WbizTool** node, set the resource and operation from this table, enter the same
-values and give it the old node's name so expressions in later nodes keep working. Output fields are unchanged.
+values and give it the old node's name so expressions in later nodes keep working. Output field names are
+unchanged; `input.target` of Send and Schedule is the number as sent, with the Country Code in `input.countryCode`.
 
 | Old node (0.2.x) | Resource | Operation |
 | --- | --- | --- |
