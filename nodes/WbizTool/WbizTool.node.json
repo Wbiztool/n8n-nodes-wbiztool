@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-wbiztool.wbizTool",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Communication"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://wbiztool.com/docs/n8n-integration/"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://wbiztool.com/docs/n8n-integration/"
+			}
+		]
+	}
+}

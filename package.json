@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-wbiztool",
-  "version": "0.2.3",
-  "description": "WbizTool node for n8n: send WhatsApp messages, files and group messages from your own number, schedule and track them.",
+  "version": "1.0.0",
+  "description": "WbizTool node for n8n: send WhatsApp messages, images and files from your own number to people and groups, schedule, cancel and track them, and manage your WhatsApp numbers.",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
@@ -49,16 +49,7 @@
       "dist/credentials/WbizToolApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/WbizTool/WbizToolSendMessage.node.js",
-      "dist/nodes/WbizTool/WbizToolSendGroupMessage.node.js",
-      "dist/nodes/WbizTool/WbizToolSendMultiMessage.node.js",
-      "dist/nodes/WbizTool/WbizToolScheduleMessage.node.js",
-      "dist/nodes/WbizTool/WbizToolCancelMessage.node.js",
-      "dist/nodes/WbizTool/WbizToolMessageStatus.node.js",
-      "dist/nodes/WbizTool/WbizToolCheckCredentials.node.js",
-      "dist/nodes/WbizTool/WbizToolListWhatsAppClients.node.js",
-      "dist/nodes/WbizTool/WbizToolCreateWhatsAppClient.node.js",
-      "dist/nodes/WbizTool/WbizToolWhatsAppClientStatus.node.js"
+      "dist/nodes/WbizTool/WbizTool.node.js"
     ],
     "strict": true
   },

@@ -38,7 +38,7 @@ export class WbizToolApi implements ICredentialType {
 			default: 0,
 			required: true,
 			description:
-				'The WhatsApp number to send from by default, from WbizTool → WhatsApp settings. Nodes with a WhatsApp Client ID field can override it.',
+				'The WhatsApp number to send from by default, from WbizTool → WhatsApp settings. The WhatsApp Client ID field of the Message operations can override it.',
 			placeholder: 'e.g. 67890',
 		},
 		{
@@ -68,7 +68,7 @@ export class WbizToolApi implements ICredentialType {
 			method: 'POST',
 			// source and User-Agent: as nodes/WbizTool/GenericFunctions.ts sends them (WbizTool's analytics)
 			headers: {
-				'User-Agent': 'n8n-nodes-wbiztool/0.2.3',
+				'User-Agent': 'n8n-nodes-wbiztool/1.0.0',
 			},
 			body: {
 				client_id: '={{$credentials.clientId}}',

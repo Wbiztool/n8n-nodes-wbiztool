@@ -3,7 +3,6 @@ import {
 	IExecuteFunctions,
 	IHttpRequestOptions,
 	INodeExecutionData,
-	INodeProperties,
 	JsonObject,
 	NodeApiError,
 	NodeOperationError,
@@ -14,7 +13,7 @@ import {
  * WordPress plugin send theirs the same way) and this User-Agent. Keep the version in step with package.json.
  */
 export const WBIZTOOL_SOURCE = 'n8n';
-export const WBIZTOOL_USER_AGENT = 'n8n-nodes-wbiztool/0.2.3';
+export const WBIZTOOL_USER_AGENT = 'n8n-nodes-wbiztool/1.0.0';
 
 export interface WbizToolRequestOptions {
 	/**
@@ -308,110 +307,20 @@ export function toScheduleTime(input: string): string | null {
 }
 
 /**
- * The Country Code field. Version 1 kept its old default of 91 (India), which was added in front of every number that
- * didn't start with 91 – also numbers written with their own country code, as the Phone Number field asks. From
- * version 1.1 it is empty by default and optional; n8n doesn't store a parameter left at its default, so existing
- * version 1 nodes keep 91 unless the user changed it.
+ * Whether a phone number is written with its own country code: a leading + or 00, as the WbizTool API reads it
+ * (parse_number_cell → `international`). The API then doesn't add `country_code` in front of it.
  */
-export function countryCodeProperties(show: IDataObject = {}): INodeProperties[] {
-	return [
-		{
-			displayName: 'Country Code',
-			name: 'countryCode',
-			type: 'string',
-			displayOptions: { show: { ...show, '@version': [1] } },
-			default: '91',
-			required: true,
-			placeholder: '91',
-			description: 'Country code without + symbol (e.g., 91 for India, 1 for USA)',
-		},
-		{
-			displayName: 'Country Code',
-			name: 'countryCode',
-			type: 'string',
-			displayOptions: { show: { ...show, '@version': [{ _cnd: { gte: 1.1 } }] } },
-			default: '',
-			placeholder: '44',
-			description:
-				"Country code without + (e.g. 44 for the UK, 1 for the USA), added in front of numbers that don't already start with it. Leave empty when the numbers include their country code.",
-		},
-	];
+export function isInternationalNumber(value: unknown): boolean {
+	return /^\s*(\+|00)/.test(String(value ?? ''));
 }
 
-/** Message Type, Message Text and the Image / File fields, as every sending node shows them. */
-export function messageProperties(placeholder: string): INodeProperties[] {
-	return [
-		{
-			displayName: 'Message Type',
-			name: 'messageType',
-			type: 'options',
-			options: [
-				{ name: 'Text', value: '0', description: 'Send text message only' },
-				{ name: 'Image with Text', value: '1', description: 'Send image with optional text' },
-				{ name: 'File with Text', value: '2', description: 'Send file with optional text' },
-			],
-			default: '0',
-			description: 'Type of message to send',
-		},
-		{
-			displayName: 'Message Text',
-			name: 'message',
-			type: 'string',
-			typeOptions: { rows: 4 },
-			default: '',
-			required: true,
-			placeholder,
-			description: 'The message text to send, up to 3,000 characters',
-		},
-		{
-			displayName: 'Image URL',
-			name: 'imageUrl',
-			type: 'string',
-			displayOptions: { show: { messageType: ['1'] } },
-			default: '',
-			required: true,
-			placeholder: 'https://example.com/image.jpg',
-			description: 'Public URL of the image to send',
-		},
-		{
-			displayName: 'File URL',
-			name: 'fileUrl',
-			type: 'string',
-			displayOptions: { show: { messageType: ['2'] } },
-			default: '',
-			required: true,
-			placeholder: 'https://example.com/document.pdf',
-			description: 'Public URL of the file to send',
-		},
-		{
-			displayName: 'File Name',
-			name: 'fileName',
-			type: 'string',
-			displayOptions: { show: { messageType: ['2'] } },
-			default: '',
-			required: true,
-			placeholder: 'document.pdf',
-			description: 'Name of the file being sent',
-		},
-	];
+/**
+ * The Phone Number of Schedule as the API gets it: spaces, dashes, dots and brackets removed, a leading + kept (0.2.x
+ * sent the digits only, so a '+44…' number with a Country Code set got that code added again). Null when it doesn't
+ * have 6 to 15 digits.
+ */
+export function schedulePhone(value: string): string | null {
+	const digits = value.replace(/\D/g, '');
+	if (digits.length < 6 || digits.length > 15) return null;
+	return value.trim().startsWith('+') ? `+${digits}` : digits;
 }
-
-/** The optional WhatsApp Client ID field of the sending nodes (empty or 0: the credential's number). */
-export const whatsAppClientIdProperty: INodeProperties = {
-	displayName: 'WhatsApp Client ID',
-	name: 'whatsappClientId',
-	type: 'number',
-	default: 0,
-	description:
-		'The WhatsApp number to send from, from WbizTool → WhatsApp settings. Leave at 0 to use the one in the credential.',
-};
-
-export const webhookUrlOption: INodeProperties = {
-	displayName: 'Webhook URL',
-	name: 'webhookUrl',
-	type: 'string',
-	default: '',
-	description:
-		'WbizTool calls this URL with msg_id and status (SENT, FAILED, CANCELLED or EXPIRED) once the message is sent or fails',
-	placeholder: 'https://your-webhook.com/callback',
-};

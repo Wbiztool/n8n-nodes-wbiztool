@@ -33,7 +33,7 @@ export function mockRun(
 	params: IDataObject,
 	reply: { statusCode?: number; body: unknown },
 	{
-		typeVersion = 1.1,
+		typeVersion = 1,
 		continueOnFail = false,
 	}: { typeVersion?: number; continueOnFail?: boolean } = {},
 ): MockRun {
@@ -41,7 +41,7 @@ export function mockRun(
 	const nodeInfo: INode = {
 		id: 'test',
 		name: 'WbizTool',
-		type: 'n8n-nodes-wbiztool.test',
+		type: 'n8n-nodes-wbiztool.wbizTool',
 		typeVersion,
 		position: [0, 0],
 		parameters: {},
